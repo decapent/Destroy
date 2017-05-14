@@ -98,7 +98,6 @@
     <Compile Include="Contracts\Entities\StereoscopicHeader.cs" />
     <Compile Include="Contracts\Extensions\HeaderExtensions.cs" />
     <Compile Include="Contracts\Extensions\StringExtensions.cs" />
-    <Compile Include="Contracts\IHeaderFactory.cs" />
     <Compile Include="Core\HeaderFactory.cs" />
     <Compile Include="MainWindow.xaml.cs">
       <DependentUpon>MainWindow.xaml</DependentUpon>

@@ -6,18 +6,21 @@ using System.Threading.Tasks;
 
 namespace GTI780_TP1.Contracts.Extensions
 {
+    /// <summary>
+    /// Extension methods for the string class
+    /// </summary>
     public static class StringExtensions
     {
+        /// <summary>
+        /// Convert an hex string to a byte array
+        /// </summary>
+        /// <param name="hex">The hexadecimal string to convert</param>
+        /// <returns>The hex representation as bytes</returns>
         public static byte[] HexToBytes(this string hex)
         {
             if(string.IsNullOrEmpty(hex))
             {
                 throw new ArgumentNullException("hex");
-            }
-
-            if(hex.Length % 2 != 0)
-            {
-                throw new ArgumentException(string.Format("Odd Hex string length, should be even --> {0}", hex.Length));
             }
 
             byte[] bytes = new byte[hex.Length / 2];

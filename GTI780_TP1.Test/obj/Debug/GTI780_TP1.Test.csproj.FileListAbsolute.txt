@@ -1,0 +1,10 @@
+C:\Users\patrick.lavallee\Documents\ETS\GTI780\TP1\GTI780_TP1.Test\bin\Debug\GTI780_TP1.Test.dll
+C:\Users\patrick.lavallee\Documents\ETS\GTI780\TP1\GTI780_TP1.Test\bin\Debug\GTI780_TP1.Test.pdb
+C:\Users\patrick.lavallee\Documents\ETS\GTI780\TP1\GTI780_TP1.Test\bin\Debug\GTI780_TP1.exe
+C:\Users\patrick.lavallee\Documents\ETS\GTI780\TP1\GTI780_TP1.Test\bin\Debug\Microsoft.Kinect.dll
+C:\Users\patrick.lavallee\Documents\ETS\GTI780\TP1\GTI780_TP1.Test\bin\Debug\Emgu.CV.World.dll
+C:\Users\patrick.lavallee\Documents\ETS\GTI780\TP1\GTI780_TP1.Test\bin\Debug\GTI780_TP1.pdb
+C:\Users\patrick.lavallee\Documents\ETS\GTI780\TP1\GTI780_TP1.Test\bin\Debug\Microsoft.Kinect.xml
+C:\Users\patrick.lavallee\Documents\ETS\GTI780\TP1\GTI780_TP1.Test\obj\Debug\GTI780_TP1.Test.csprojResolveAssemblyReference.cache
+C:\Users\patrick.lavallee\Documents\ETS\GTI780\TP1\GTI780_TP1.Test\obj\Debug\GTI780_TP1.Test.dll
+C:\Users\patrick.lavallee\Documents\ETS\GTI780\TP1\GTI780_TP1.Test\obj\Debug\GTI780_TP1.Test.pdb

@@ -10,9 +10,9 @@ using GTI780_TP1.Contracts.Extensions;
 
 namespace GTI780_TP1.Core
 {
-    public class HeaderFactory : IHeaderFactory
+    public static class HeaderFactory
     {
-        public Header Create(HeaderType headerType)
+        public static Header Create(HeaderType headerType)
         {
             switch(headerType)
             {
@@ -23,7 +23,7 @@ namespace GTI780_TP1.Core
             }
         }
 
-        private Header CreateStereoscopicHeader(HeaderType headerType)
+        private static Header CreateStereoscopicHeader(HeaderType headerType)
         {
             // The calculated Header Message for a 2d Scene + Depth side by side
             var H = "F10140800000C42DD3AFF2140000000000000000000000000000000036958221";
