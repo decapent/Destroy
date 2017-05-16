@@ -93,12 +93,12 @@
       <DependentUpon>App.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="Contracts\Entities\Header.cs" />
-    <Compile Include="Contracts\Entities\HeaderType.cs" />
-    <Compile Include="Contracts\Entities\StereoscopicHeader.cs" />
-    <Compile Include="Contracts\Extensions\HeaderExtensions.cs" />
-    <Compile Include="Contracts\Extensions\StringExtensions.cs" />
-    <Compile Include="Core\HeaderFactory.cs" />
+    <Compile Include="Extensions\BitmapExtensions.cs" />
+    <Compile Include="Header\Entities\AbstractHeader.cs" />
+    <Compile Include="Header\Entities\HeaderType.cs" />
+    <Compile Include="Header\Entities\StereoscopicHeader.cs" />
+    <Compile Include="Extensions\StringExtensions.cs" />
+    <Compile Include="Header\HeaderFactory.cs" />
     <Compile Include="MainWindow.xaml.cs">
       <DependentUpon>MainWindow.xaml</DependentUpon>
       <SubType>Code</SubType>

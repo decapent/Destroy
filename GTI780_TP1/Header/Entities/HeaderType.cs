@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace GTI780_TP1.Contracts.Entities
+﻿namespace GTI780_TP1.Header.Entities
 {
     /// <summary>
     /// Image Header types

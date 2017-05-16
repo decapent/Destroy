@@ -11,7 +11,7 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
-using System.Windows.Shapes;
+//using System.Windows.Shapes;
 
 // Includes for the Lab
 using System.ComponentModel;
@@ -26,6 +26,11 @@ using Emgu.CV;
 
 using Emgu.CV.Structure;
 using Emgu.CV.CvEnum;
+
+using GTI780_TP1.Header;
+using GTI780_TP1.Header.Entities;
+using GTI780_TP1.Extensions;
+
 namespace GTI780_TP1
 {
     /// <summary>
@@ -64,6 +69,9 @@ namespace GTI780_TP1
 
             // Sets the correct size to the display components
             InitializeComponentsSize();
+
+            // Set Header image for 2d color + depth side by side format
+            InitializeHeader();
 
             // Instanciate the WriteableBitmaps used to display the kinect frames
             this.colorBitmap = new WriteableBitmap(RAWCOLORWIDTH, RAWCOLORHEIGHT, 96.0, 96.0, PixelFormats.Bgr32, null);
@@ -253,6 +261,16 @@ namespace GTI780_TP1
             this.PictureBox2.Width = this.screenWidth / 2;
             this.PictureBox2.Margin = new Thickness(0, 0, 0, 0);
             this.PictureBox2.Height = this.screenHeight;
+        }
+
+        private void InitializeHeader()
+        {
+            var applicationPath = Path.GetDirectoryName(Path.GetDirectoryName(Directory.GetCurrentDirectory()));
+            var header = HeaderFactory.Create(HeaderType.Stereoscopic);
+
+            header.EnsureBitmap(applicationPath);
+
+            this.HeaderImage.Source = header.HeaderImage.ToImageSource();
         }
 
         private void MainWindow_Closing(object sender, CancelEventArgs e)
