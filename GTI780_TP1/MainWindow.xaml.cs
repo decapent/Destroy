@@ -299,7 +299,7 @@ namespace GTI780_TP1
 
         private void InitializeHeader()
         {
-            var applicationPath = Path.GetDirectoryName(Path.GetDirectoryName(Directory.GetCurrentDirectory()));
+            var applicationPath = System.IO.Path.GetDirectoryName(System.IO.Path.GetDirectoryName(Directory.GetCurrentDirectory()));
             var header = HeaderFactory.Create(HeaderType.Stereoscopic);
 
             header.EnsureBitmap(applicationPath);
