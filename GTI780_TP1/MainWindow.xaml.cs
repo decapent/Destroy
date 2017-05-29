@@ -66,13 +66,20 @@ namespace GTI780_TP1
 
         // The kinect frame reader
         private MultiSourceFrameReader frameReader = null;
-        private CoordinateMapper coordinateMapper;
 
-        
-        //A revoir
-        private CameraSpacePoint cameraPoint;
-        private CameraSpacePoint body;
-        private CameraMode _mode = CameraMode.Color; //Un enum
+        /// <summary>
+        /// Intermediate storage for frame data converted to color
+        /// </summary>
+        private byte[] depthPixels = null;
+        private FrameDescription depthFrameDescription = null;
+        /// <summary>
+        /// Map depth range to byte range
+        /// </summary>
+        private const int MapDepthToByte = 700 / 256;//**********
+
+
+
+
 
         public MainWindow()
         {
@@ -86,7 +93,7 @@ namespace GTI780_TP1
 
             // Instanciate the WriteableBitmaps used to display the kinect frames
             this.colorBitmap = new WriteableBitmap(RAWCOLORWIDTH, RAWCOLORHEIGHT, 96.0, 96.0, PixelFormats.Bgr32, null);
-            this.depthBitmap = new WriteableBitmap(RAWDEPTHWIDTH, RAWDEPTHHEIGHT, 96.0, 96.0, PixelFormats.Gray16, null); //Quel type de gris??
+            this.depthBitmap = new WriteableBitmap(RAWDEPTHWIDTH, RAWDEPTHHEIGHT, 96.0, 96.0, PixelFormats.Gray8, null); //Quel type de gris??
 
             // Connect to the Kinect Sensor
             this.kinectSensor = KinectSensor.GetDefault();
@@ -103,6 +110,10 @@ namespace GTI780_TP1
 
             // Sets the context for the data binding
             this.DataContext = this;
+
+
+
+            
         }
 
         /// <summary>
@@ -130,7 +141,7 @@ namespace GTI780_TP1
             DepthFrame depthFrame = multiSourceFrame.DepthFrameReference.AcquireFrame();
 
 
-            IList<Body> bodies;
+         
 
             if (colorFrame == null || depthFrame == null )
             {
@@ -172,6 +183,11 @@ namespace GTI780_TP1
                 // ================================================================
                 FrameDescription depthDescription = depthFrame.FrameDescription;
 
+                // allocate space to put the pixels being received and converted
+                this.depthFrameDescription = this.kinectSensor.DepthFrameSource.FrameDescription;
+
+                this.depthPixels = new byte[this.depthFrameDescription.Width * this.depthFrameDescription.Height];
+
                 using (KinectBuffer depthBuffer = depthFrame.LockImageBuffer())
                 {
                     // Lock the depthBitmap while we write in it.
@@ -179,20 +195,13 @@ namespace GTI780_TP1
                     isDepthBitmapLocked = true;
 
                     // Check for correct size
-                   // if (depthDescription.Width == this.colorBitmap.Width && depthDescription.Height == this.colorBitmap.Height)
-                    //{   //Simon besoin ou pas?
+                    if (depthDescription.Width == this.colorBitmap.Width && depthDescription.Height == this.colorBitmap.Height)
+                    {
 
                         //-----------------------------------------------------------
                         // Effectuer la correspondance espace Profondeur---Couleur 
                         //-----------------------------------------------------------
-                        //  Utiliser la ligne ci-dessous pour l'image de profondeur
-                        Image<Gray, byte> depthImageGray = new Image<Gray, byte>(RAWDEPTHWIDTH, RAWDEPTHHEIGHT);
 
-                        //-----------------------------------------------------------
-                        // Traiter l'image de profondeur 
-                        //-----------------------------------------------------------
-
-                        //A revoir!!!
                         DepthSpacePoint[] depthSpacePointTable = null;
                         FrameDescription colorFrameDescription = this.kinectSensor.ColorFrameSource.FrameDescription;
 
@@ -201,20 +210,47 @@ namespace GTI780_TP1
                         depthSpacePointTable = new DepthSpacePoint[colorFrameWidht * colorFrameHeight];
                         this.kinectSensor.CoordinateMapper.MapColorFrameToDepthSpaceUsingIntPtr(depthBuffer.UnderlyingBuffer, depthBuffer.Size, depthSpacePointTable);
 
+                        //................................//
+
+
+                        //  Utiliser la ligne ci-dessous pour l'image de profondeur
+                        Image<Gray, byte> depthImageGray = new Image<Gray, byte>(RAWDEPTHWIDTH, RAWDEPTHHEIGHT);
+
+                        //-----------------------------------------------------------
+                        // Traiter l'image de profondeur 
+                        //-----------------------------------------------------------
+
+                      
+
                         // Une fois traitée convertir l'image en Bgra
                         Image<Bgra, byte> depthImageBgra = depthImageGray.Convert<Bgra, byte>();
-                  //  }
+                        depthImageBgra = depthImageBgra.SmoothMedian(15);
+
+                    }
 
                     //---------------------------------------------------------------------------------------------------------
                     //  Modifier le code pour que depthBitmap contienne depthImageBgra au lieu du contenu trame couleur actuel
                     //---------------------------------------------------------------------------------------------------------
-                    if (depthDescription.Width == this.depthBitmap.Width && depthDescription.Height == this.depthBitmap.Height)
+                    if (colorDescription.Width == this.colorBitmap.Width && colorDescription.Height == this.colorBitmap.Height)
                     {
                         //depthFrame.CopyFrameDataToIntPtr(this.depthBitmap.BackBuffer, (uint)(depthDescription.Width * depthDescription.Height * 2));
-                        depthFrame.CopyFrameDataToIntPtr(this.depthBitmap.BackBuffer, (uint)(depthDescription.Width * depthDescription.Height *2 ));
+                        // depthFrame.CopyFrameDataToIntPtr(this.depthBitmap.BackBuffer, (uint)(depthDescription.Width * depthDescription.Height *2 ));
 
                         // Mark the entire buffer as dirty to refresh the display
-                        this.depthBitmap.AddDirtyRect(new Int32Rect(0, 0, depthDescription.Width, depthDescription.Height));
+                        //this.depthBitmap.AddDirtyRect(new Int32Rect(0, 0, depthDescription.Width, depthDescription.Height));
+
+
+
+                        // Note: In order to see the full range of depth (including the less reliable far field depth)
+                        // we are setting maxDepth to the extreme potential depth threshold
+                        ushort maxDepth = ushort.MaxValue;
+
+                        // If you wish to filter by reliable depth distance, uncomment the following line:
+                        //// maxDepth = depthFrame.DepthMaxReliableDistance
+
+                        this.ProcessDepthFrameData(depthBuffer.UnderlyingBuffer, depthBuffer.Size, depthFrame.DepthMinReliableDistance, maxDepth);
+                        this.RenderDepthPixels();
+
                     }
 
                     // Unlock the depthBitmap
@@ -288,7 +324,7 @@ namespace GTI780_TP1
             this.Grid1.Height = this.screenHeight;
 
             // Make the PictureBox1 half the screen width and full screen height
-            this.PictureBox1.Width = this.screenWidth / 2;
+            this.PictureBox1.Width = this.screenWidth / 8;
             this.PictureBox1.Height = this.screenHeight;
 
             // Make the PictureBox2 half the screen width and full screen height
@@ -322,34 +358,41 @@ namespace GTI780_TP1
             }
         }
 
-        //Simon
-        private void DrawPoint(ColorSpacePoint point)
+
+        /// <summary>
+        /// Directly accesses the underlying image buffer of the DepthFrame to 
+        /// create a displayable bitmap.
+        /// This function requires the /unsafe compiler option as we make use of direct
+        /// access to the native memory pointed to by the depthFrameData pointer.
+        /// </summary>
+        /// <param name="depthFrameData">Pointer to the DepthFrame image data</param>
+        /// <param name="depthFrameDataSize">Size of the DepthFrame image data</param>
+        /// <param name="minDepth">The minimum reliable depth value for the frame</param>
+        /// <param name="maxDepth">The maximum reliable depth value for the frame</param>
+        private unsafe void ProcessDepthFrameData(IntPtr depthFrameData, uint depthFrameDataSize, ushort minDepth, ushort maxDepth)
         {
-            // Create an ellipse.
-            System.Windows.Shapes.Ellipse ellipse = new System.Windows.Shapes.Ellipse
+            // depth frame data is a 16 bit value
+            ushort* frameData = (ushort*)depthFrameData;
+
+            // convert depth to a visual representation
+            for (int i = 0; i < (int)(depthFrameDataSize / this.depthFrameDescription.BytesPerPixel); ++i)
             {
-                Width = 20,
-                Height = 20,
-                Fill = System.Windows.Media.Brushes.Red
-            };
+                // Get the depth for this pixel
+                ushort depth = frameData[i];
 
-            // Position the ellipse according to the point's coordinates.
-            Canvas.SetLeft(ellipse, point.X - ellipse.Width / 2);
-            Canvas.SetTop(ellipse, point.Y - ellipse.Height / 2);
-
-            // Add the ellipse to the canvas.
-            this.Grid1.Children.Add(ellipse);
+                // To convert to a byte, we're mapping the depth value to the byte range.
+                // Values outside the reliable depth range are mapped to 0 (black).
+                this.depthPixels[i] = (byte)(depth >= minDepth && depth <= maxDepth ? (depth / MapDepthToByte) : 0);
+            }
         }
 
-        //Simon
-        enum CameraMode
+        private void RenderDepthPixels()
         {
-            Color,
-            Depth,
-            Infrared
+            this.depthBitmap.WritePixels(
+                new Int32Rect(0, 0, this.depthBitmap.PixelWidth, this.depthBitmap.PixelHeight),
+                this.depthPixels,
+                this.depthBitmap.PixelWidth,
+                0);
         }
-
-
-
     }
 }
