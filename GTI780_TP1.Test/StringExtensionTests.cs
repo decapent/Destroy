@@ -55,7 +55,7 @@ namespace GTI780_TP1.Test
             char invalid = '2';
 
             // Act
-            var convertedBit = invalid.ToByte();
+            var convertedBit = invalid.ToMinMaxByteValue();
 
             // Assert
         }
@@ -68,7 +68,7 @@ namespace GTI780_TP1.Test
             char bit = '1';
 
             // Act
-            var convertedBit = bit.ToByte();
+            var convertedBit = bit.ToMinMaxByteValue();
 
             // Assert
             Assert.AreEqual(byte.MaxValue, convertedBit);
@@ -82,7 +82,7 @@ namespace GTI780_TP1.Test
             char bit = '0';
 
             // Act
-            var convertedBit = bit.ToByte();
+            var convertedBit = bit.ToMinMaxByteValue();
 
             // Assert
             Assert.AreEqual(byte.MinValue, convertedBit);

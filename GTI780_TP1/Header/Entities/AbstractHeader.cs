@@ -53,5 +53,11 @@ namespace GTI780_TP1.Header.Entities
         /// </summary>
         /// <param name="filePath">The path to the directory in which will be saved the header image</param>
         public abstract void EnsureBitmap(string filePath);
+
+        /// <summary>
+        /// Construct the byte array containing the header data
+        /// </summary>
+        /// <returns>The byte representation of the header</returns>
+        protected abstract byte[] BuildImageBuffer();
     }
 }

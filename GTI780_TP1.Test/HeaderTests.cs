@@ -40,9 +40,10 @@ namespace GTI780_TP1.Test
         {
             // Arrange
             var header = HeaderFactory.Create(HeaderType.Stereoscopic);
+            var invalidDirectoryPath = string.Format("C:\\{0}", new Guid().ToString());
 
             // Act
-            header.EnsureBitmap("C:\\InexistantDirectoryPath");
+            header.EnsureBitmap(invalidDirectoryPath);
 
             // Assert
         }
@@ -66,6 +67,7 @@ namespace GTI780_TP1.Test
             Assert.AreEqual(512, header.HeaderImage.Width);
             Assert.AreEqual(1, header.HeaderImage.Height);
             Assert.AreEqual(PixelFormat.Format8bppIndexed, header.HeaderImage.PixelFormat);
+            Assert.IsTrue(File.Exists(Path.Combine(applicationPath, "EnteteModifiee.bmp")));
         }
     }
 }

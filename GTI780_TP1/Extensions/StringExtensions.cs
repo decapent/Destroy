@@ -29,7 +29,7 @@ namespace GTI780_TP1.Extensions
             }
 
             // Convert bytes representation to binary
-            return bytes.Select(b => Convert.ToString(b, 2).PadLeft(8, '0')).ToList();
+            return bytes.Select(b => Convert.ToString(b, 2).PadLeft(8, '0'));
         }
 
         /// <summary>
@@ -37,7 +37,7 @@ namespace GTI780_TP1.Extensions
         /// </summary>
         /// <param name="value">The binary char value</param>
         /// <returns>The value 255 if the bit is 1, 0 otherwise.</returns>
-        public static byte ToByte(this char bit)
+        public static byte ToMinMaxByteValue(this char bit)
         {
             if(bit != '0' && bit != '1')
             {
