@@ -1,14 +1,14 @@
 ﻿using System;
-using System.Collections.Generic;
+using System.Collections.Generic;//
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
-using System.Windows.Controls;
+using System.Windows.Controls;//
 using System.Windows.Data;
 using System.Windows.Documents;
 using System.Windows.Input;
-using System.Windows.Media;
+using System.Windows.Media; //
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 //using System.Windows.Shapes;
@@ -18,9 +18,12 @@ using System.ComponentModel;
 using System.Diagnostics;
 using System.Globalization;
 using System.IO;
-using Microsoft.Kinect;
+using Microsoft.Kinect; //
 using System.Windows.Forms;
 using System.Drawing;
+using System.Windows.Shapes; //Simon
+using System.Windows.Media;  //Simon
+using System.Windows;
 
 using Emgu.CV;
 
@@ -37,6 +40,7 @@ namespace GTI780_TP1
     /// Logique d'interaction pour MainWindow.xaml
     /// </summary>
     public partial class MainWindow : Window
+
     {
         // Size of the raw depth stream
         private const int RAWDEPTHWIDTH = 512;
@@ -62,6 +66,13 @@ namespace GTI780_TP1
 
         // The kinect frame reader
         private MultiSourceFrameReader frameReader = null;
+        private CoordinateMapper coordinateMapper;
+
+        
+        //A revoir
+        private CameraSpacePoint cameraPoint;
+        private CameraSpacePoint body;
+        private CameraMode _mode = CameraMode.Color; //Un enum
 
         public MainWindow()
         {
@@ -75,13 +86,14 @@ namespace GTI780_TP1
 
             // Instanciate the WriteableBitmaps used to display the kinect frames
             this.colorBitmap = new WriteableBitmap(RAWCOLORWIDTH, RAWCOLORHEIGHT, 96.0, 96.0, PixelFormats.Bgr32, null);
-            this.depthBitmap = new WriteableBitmap(RAWDEPTHWIDTH, RAWDEPTHHEIGHT, 96.0, 96.0, PixelFormats.Bgr32, null); 
+            this.depthBitmap = new WriteableBitmap(RAWDEPTHWIDTH, RAWDEPTHHEIGHT, 96.0, 96.0, PixelFormats.Gray16, null); //Quel type de gris??
 
             // Connect to the Kinect Sensor
             this.kinectSensor = KinectSensor.GetDefault();
 
             // open the reader for the color frames
-            this.frameReader = this.kinectSensor.OpenMultiSourceFrameReader(FrameSourceTypes.Color | FrameSourceTypes.Depth);
+            //Modif Simon
+            this.frameReader = this.kinectSensor.OpenMultiSourceFrameReader(FrameSourceTypes.Color | FrameSourceTypes.Depth | FrameSourceTypes.Infrared | FrameSourceTypes.Body); // A modifier si on utilise ou pas le IR + Body
 
             // wire handler for frame arrival
             this.frameReader.MultiSourceFrameArrived += this.Reader_MultiSourceFrameArrived;
@@ -106,8 +118,9 @@ namespace GTI780_TP1
 
             // Acquire multisource frame containing the color and depth information of the kinect stream
             MultiSourceFrame multiSourceFrame = frameArrivedEvent.FrameReference.AcquireFrame();
+
             if (multiSourceFrame == null)
-            { 
+            {
                 return;
             }
 
@@ -115,7 +128,11 @@ namespace GTI780_TP1
             // Abort if either of the frames are null
             ColorFrame colorFrame = multiSourceFrame.ColorFrameReference.AcquireFrame();
             DepthFrame depthFrame = multiSourceFrame.DepthFrameReference.AcquireFrame();
-            if(colorFrame == null || depthFrame == null)
+
+
+            IList<Body> bodies;
+
+            if (colorFrame == null || depthFrame == null )
             {
                 return;
             }
@@ -127,6 +144,7 @@ namespace GTI780_TP1
                 // ColorFrame code block
                 // ===============================   
                 FrameDescription colorDescription = colorFrame.FrameDescription;
+
                 using (KinectBuffer colorBuffer = colorFrame.LockRawImageBuffer())
                 {
                     // Lock the colorBitmap while we write in it.
@@ -153,31 +171,47 @@ namespace GTI780_TP1
                 // Remarque : Beaucoup de code à modifer/ajouter dans cette partie
                 // ================================================================
                 FrameDescription depthDescription = depthFrame.FrameDescription;
+
                 using (KinectBuffer depthBuffer = depthFrame.LockImageBuffer())
                 {
                     // Lock the depthBitmap while we write in it.
                     this.depthBitmap.Lock();
                     isDepthBitmapLocked = true;
 
-                    //-----------------------------------------------------------
-                    // Effectuer la correspondance espace Profondeur---Couleur 
-                    //-----------------------------------------------------------
-                    //  Utiliser la ligne ci-dessous pour l'image de profondeur
-                    Image<Gray, byte> depthImageGray = new Image<Gray, byte>(RAWDEPTHWIDTH, RAWDEPTHHEIGHT);
+                    // Check for correct size
+                   // if (depthDescription.Width == this.colorBitmap.Width && depthDescription.Height == this.colorBitmap.Height)
+                    //{   //Simon besoin ou pas?
 
-                    //-----------------------------------------------------------
-                    // Traiter l'image de profondeur 
-                    //-----------------------------------------------------------
+                        //-----------------------------------------------------------
+                        // Effectuer la correspondance espace Profondeur---Couleur 
+                        //-----------------------------------------------------------
+                        //  Utiliser la ligne ci-dessous pour l'image de profondeur
+                        Image<Gray, byte> depthImageGray = new Image<Gray, byte>(RAWDEPTHWIDTH, RAWDEPTHHEIGHT);
 
-                    // Une fois traitée convertir l'image en Bgra
-                    Image<Bgra, byte> depthImageBgra = depthImageGray.Convert<Bgra, byte>();
+                        //-----------------------------------------------------------
+                        // Traiter l'image de profondeur 
+                        //-----------------------------------------------------------
+
+                        //A revoir!!!
+                        DepthSpacePoint[] depthSpacePointTable = null;
+                        FrameDescription colorFrameDescription = this.kinectSensor.ColorFrameSource.FrameDescription;
+
+                        int colorFrameWidht = colorFrameDescription.Width;
+                        int colorFrameHeight = colorFrameDescription.Height;
+                        depthSpacePointTable = new DepthSpacePoint[colorFrameWidht * colorFrameHeight];
+                        this.kinectSensor.CoordinateMapper.MapColorFrameToDepthSpaceUsingIntPtr(depthBuffer.UnderlyingBuffer, depthBuffer.Size, depthSpacePointTable);
+
+                        // Une fois traitée convertir l'image en Bgra
+                        Image<Bgra, byte> depthImageBgra = depthImageGray.Convert<Bgra, byte>();
+                  //  }
 
                     //---------------------------------------------------------------------------------------------------------
                     //  Modifier le code pour que depthBitmap contienne depthImageBgra au lieu du contenu trame couleur actuel
                     //---------------------------------------------------------------------------------------------------------
                     if (depthDescription.Width == this.depthBitmap.Width && depthDescription.Height == this.depthBitmap.Height)
-                    {                    
-                        depthFrame.CopyFrameDataToIntPtr(this.depthBitmap.BackBuffer, (uint)(depthDescription.Width * depthDescription.Height * 2));
+                    {
+                        //depthFrame.CopyFrameDataToIntPtr(this.depthBitmap.BackBuffer, (uint)(depthDescription.Width * depthDescription.Height * 2));
+                        depthFrame.CopyFrameDataToIntPtr(this.depthBitmap.BackBuffer, (uint)(depthDescription.Width * depthDescription.Height *2 ));
 
                         // Mark the entire buffer as dirty to refresh the display
                         this.depthBitmap.AddDirtyRect(new Int32Rect(0, 0, depthDescription.Width, depthDescription.Height));
@@ -265,7 +299,7 @@ namespace GTI780_TP1
 
         private void InitializeHeader()
         {
-            var applicationPath = Path.GetDirectoryName(Path.GetDirectoryName(Directory.GetCurrentDirectory()));
+            var applicationPath = System.IO.Path.GetDirectoryName(System.IO.Path.GetDirectoryName(Directory.GetCurrentDirectory()));
             var header = HeaderFactory.Create(HeaderType.Stereoscopic);
 
             header.EnsureBitmap(applicationPath);
@@ -287,5 +321,35 @@ namespace GTI780_TP1
                 this.kinectSensor = null;
             }
         }
+
+        //Simon
+        private void DrawPoint(ColorSpacePoint point)
+        {
+            // Create an ellipse.
+            System.Windows.Shapes.Ellipse ellipse = new System.Windows.Shapes.Ellipse
+            {
+                Width = 20,
+                Height = 20,
+                Fill = System.Windows.Media.Brushes.Red
+            };
+
+            // Position the ellipse according to the point's coordinates.
+            Canvas.SetLeft(ellipse, point.X - ellipse.Width / 2);
+            Canvas.SetTop(ellipse, point.Y - ellipse.Height / 2);
+
+            // Add the ellipse to the canvas.
+            this.Grid1.Children.Add(ellipse);
+        }
+
+        //Simon
+        enum CameraMode
+        {
+            Color,
+            Depth,
+            Infrared
+        }
+
+
+
     }
 }
