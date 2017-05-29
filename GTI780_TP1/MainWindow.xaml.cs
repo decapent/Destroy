@@ -75,7 +75,7 @@ namespace GTI780_TP1
         /// <summary>
         /// Map depth range to byte range
         /// </summary>
-        private const int MapDepthToByte = 8000 / 256;
+        private const int MapDepthToByte = 700 / 256;//**********
 
 
 
@@ -324,7 +324,7 @@ namespace GTI780_TP1
             this.Grid1.Height = this.screenHeight;
 
             // Make the PictureBox1 half the screen width and full screen height
-            this.PictureBox1.Width = this.screenWidth / 2;
+            this.PictureBox1.Width = this.screenWidth / 8;
             this.PictureBox1.Height = this.screenHeight;
 
             // Make the PictureBox2 half the screen width and full screen height
