@@ -61,7 +61,7 @@ namespace GTI780_TP1.Header.Entities
         /// Construct the byte array containing the header data
         /// </summary>
         /// <returns>The byte representation of the header</returns>
-        private byte[] BuildImageBuffer()
+        protected override byte[] BuildImageBuffer()
         {
             var imageBuffer = new byte[BUFFERSIZE];
 
@@ -77,7 +77,7 @@ namespace GTI780_TP1.Header.Entities
                     var bufferIndex = CalculateImageBufferIndex(byteIndex, bitIndex);
                     var heavyBit = currentByte.FirstOrDefault();
 
-                    imageBuffer[bufferIndex] = heavyBit.ToByte();
+                    imageBuffer[bufferIndex] = heavyBit.ToMinMaxByteValue();
                 }
             }
 
