@@ -54,7 +54,7 @@ namespace GTI780_TP1.Header.Entities
                 PixelFormat.Format8bppIndexed,
                 Marshal.UnsafeAddrOfPinnedArrayElement(imageBuffer, 0));
 
-            this.HeaderImage.Save(Path.Combine(filePath, "EnteteModifiee.bmp"));             
+            this.HeaderImage.Save(Path.Combine(filePath, "EnteteModifiee.bmp"));          
         }
 
         /// <summary>
