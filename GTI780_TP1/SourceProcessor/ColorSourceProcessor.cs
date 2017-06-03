@@ -12,53 +12,43 @@ namespace GTI780_TP1.SourceProcessor
 {
     public sealed class ColorSourceProcessor : AbstractSourceProcessor
     {
-        public ColorFrame Source { get; set; }
-
         public ColorSourceProcessor(WriteableBitmap bitmap)
             : base(SourceProcessorTypes.Color)
         {
-            this.Source = null;
             this.Bitmap = bitmap;
         }
 
-        public override void Process()
+        public void Process(ColorFrame frame)
         {
-            bool isColorBitmapLocked = false;
+            bool isBitmapLocked = true;
 
             try
             { 
-                FrameDescription colorDescription = this.Source.FrameDescription;
-                using (KinectBuffer colorBuffer = this.Source.LockRawImageBuffer())
+                FrameDescription frameDescription = frame.FrameDescription;
+                using (KinectBuffer colorBuffer = frame.LockRawImageBuffer())
                 {
-                    // Lock the colorBitmap while we write in it.
                     this.Bitmap.Lock();
-                    isColorBitmapLocked = true;
 
                     // Check for correct size
-                    if (colorDescription.Width == this.Bitmap.Width && colorDescription.Height == this.Bitmap.Height)
+                    if (frameDescription.Width == this.Bitmap.Width && frameDescription.Height == this.Bitmap.Height)
                     {
                         //write the new color frame data to the display bitmap
-                        this.Source.CopyConvertedFrameDataToIntPtr(this.Bitmap.BackBuffer, (uint)(colorDescription.Width * colorDescription.Height * BYTESPERPIXELS), ColorImageFormat.Bgra);
+                        frame.CopyConvertedFrameDataToIntPtr(this.Bitmap.BackBuffer, (uint)(frameDescription.Width * frameDescription.Height * BYTESPERPIXELS), ColorImageFormat.Bgra);
 
                         // Mark the entire buffer as dirty to refresh the display
-                        this.Bitmap.AddDirtyRect(new Int32Rect(0, 0, colorDescription.Width, colorDescription.Height));
+                        this.Bitmap.AddDirtyRect(new Int32Rect(0, 0, frameDescription.Width, frameDescription.Height));
                     }
 
-                    // Unlock the colorBitmap
+                    // Unlock the Bitmap
                     this.Bitmap.Unlock();
-                    isColorBitmapLocked = false;
+                    isBitmapLocked = false;
                 }
             }
             finally
             {
-                if (isColorBitmapLocked)
+                if (isBitmapLocked)
                 {
                     this.Bitmap.Unlock();
-                }
-
-                if (this.Source != null)
-                {
-                    this.Source.Dispose();
                 }
             }
         }

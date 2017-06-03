@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows.Media;
+﻿using System.Windows.Media;
 using System.Windows.Media.Imaging;
 
 namespace GTI780_TP1.SourceProcessor
@@ -21,7 +16,5 @@ namespace GTI780_TP1.SourceProcessor
         {
             this.ProcessorType = processorType;
         }
-
-        public abstract void Process();
     }
 }

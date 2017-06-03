@@ -53,7 +53,7 @@ namespace GTI780_TP1.Test
         /// </summary>
         [TestMethod]
         [TestCategory("Header")]
-        public void EnsureBitmap_SuppliedWithExistingPath_ShouldCreateNewImageOnDisk()
+        public void EnsureBitmap_SuppliedWithExistingFilePath_ShouldNotCreateNewImageOnDisk()
         {
             // Arrange
             var applicationPath = Path.GetDirectoryName(Path.GetDirectoryName(Directory.GetCurrentDirectory()));
@@ -63,11 +63,7 @@ namespace GTI780_TP1.Test
             header.EnsureBitmap(applicationPath);
 
             // Assert
-            Assert.IsNotNull(header.HeaderImage);
-            Assert.AreEqual(512, header.HeaderImage.Width);
-            Assert.AreEqual(1, header.HeaderImage.Height);
-            Assert.AreEqual(PixelFormat.Format8bppIndexed, header.HeaderImage.PixelFormat);
-            Assert.IsTrue(File.Exists(Path.Combine(applicationPath, "EnteteModifiee.bmp")));
+            Assert.IsNull(header.HeaderImage);
         }
     }
 }

@@ -45,16 +45,22 @@ namespace GTI780_TP1.Header.Entities
                 throw new ExternalException("The specified directory does not exists!");
             }
 
-            var imageBuffer = this.BuildImageBuffer();
-            
-            this.HeaderImage = new Bitmap(
-                imageBuffer.Length, // columns
-                1,                  // rows
-                imageBuffer.Length, // stride
-                PixelFormat.Format8bppIndexed,
-                Marshal.UnsafeAddrOfPinnedArrayElement(imageBuffer, 0));
+            var imagePath = Path.Combine(filePath, HEADERFILENAME);
 
-            this.HeaderImage.Save(Path.Combine(filePath, "EnteteModifiee.bmp"));          
+            // Do not create the file if it already is on disk.
+            if(!File.Exists(imagePath))
+            { 
+                var imageBuffer = this.BuildImageBuffer();
+            
+                this.HeaderImage = new Bitmap(
+                    imageBuffer.Length, // columns
+                    1,                  // rows
+                    imageBuffer.Length, // stride
+                    PixelFormat.Format8bppIndexed,
+                    Marshal.UnsafeAddrOfPinnedArrayElement(imageBuffer, 0));
+
+                this.HeaderImage.Save(imagePath);
+            }
         }
 
         /// <summary>
@@ -68,16 +74,17 @@ namespace GTI780_TP1.Header.Entities
             // Foreach byte
             for (int byteIndex = 0; byteIndex < this._binaryMessage.Count(); byteIndex++)
             {
-                // Foreach bit
+                // Foreach bit - Starting with the lightest bit at last index
                 var currentByte = this._binaryMessage.ElementAt(byteIndex);
                 for (int bitIndex = currentByte.Length - 1; bitIndex >= 0; bitIndex--)
                 {
-                    // Determine which index needs to be written and the value of the heavy bit
-                    // that will caracterize the index
-                    var bufferIndex = CalculateImageBufferIndex(byteIndex, bitIndex);
-                    var heavyBit = currentByte.FirstOrDefault();
+                    // Determine which index needs to be written. We start from the lightest bit
+                    // up to the heaviest one. The first bit to be fed to the H function is the last
+                    // one but needs to be treated as Index == 0.
+                    var convertedBitIndex = Math.Abs(bitIndex - (currentByte.Length - 1));
+                    var bufferIndex = H(byteIndex, convertedBitIndex);
 
-                    imageBuffer[bufferIndex] = heavyBit.ToMinMaxByteValue();
+                    imageBuffer[bufferIndex] = currentByte[bitIndex].ToMinMaxByteValue();
                 }
             }
 
@@ -87,12 +94,12 @@ namespace GTI780_TP1.Header.Entities
         /// <summary>
         /// Calculates the index of the header image buffer that needs to be written.
         /// </summary>
-        /// <param name="byteIndex">The byte index</param>
-        /// <param name="bitIndex">The bit index</param>
+        /// <param name="x">The byte index</param>
+        /// <param name="y">The bit index</param>
         /// <returns>The index of the header image buffer.</returns>
-        private static int CalculateImageBufferIndex(int byteIndex, int bitIndex)
+        private static int H(int x, int y)
         {
-            return 2 * (7 - bitIndex) + 16 * byteIndex;
+            return 2 * (7 - y) + 16 * x;
         }
     }
 }
