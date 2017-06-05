@@ -42,7 +42,7 @@ namespace GTI780_TP1.SourceProcessor
 
         private static DepthSourceProcessor CreateDepthSourceProcessor(CoordinateMapper mapper)
         {
-            var bitmap = new WriteableBitmap(RAWDEPTHWIDTH, RAWDEPTHHEIGHT, 96.0, 96.0, PixelFormats.Gray8, null);
+            var bitmap = new WriteableBitmap(RAWDEPTHWIDTH, RAWDEPTHHEIGHT, 96.0, 96.0, PixelFormats.Bgr32, null);
             return new DepthSourceProcessor(bitmap, mapper);
         }
     }

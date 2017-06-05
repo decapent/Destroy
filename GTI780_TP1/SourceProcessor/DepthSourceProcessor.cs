@@ -48,12 +48,7 @@ namespace GTI780_TP1.SourceProcessor
                             frame.DepthMaxReliableDistance, 
                             frameDescription.BytesPerPixel);
 
-                        // Render depth pixels
-                        this.Bitmap.WritePixels(
-                            new Int32Rect(0, 0, this.Bitmap.PixelWidth, this.Bitmap.PixelHeight),
-                            this._depthPixels,
-                            this.Bitmap.PixelWidth,
-                            0);
+                      
                     }
                     
                     this.Bitmap.Unlock();
@@ -108,7 +103,14 @@ namespace GTI780_TP1.SourceProcessor
 
             // Une fois traitée convertir l'image en Bgra
             var depthImageBgra = depthImageGray.Convert<Bgra, byte>();           
-            depthImageBgra = depthImageBgra.SmoothMedian(7);          
+            depthImageBgra = depthImageBgra.SmoothMedian(7);
+
+            // Render depth pixels
+            this.Bitmap.WritePixels(
+                new Int32Rect(0, 0, this.Bitmap.PixelWidth, this.Bitmap.PixelHeight),
+                depthImageBgra.Bytes,
+                this.Bitmap.PixelWidth * 4,
+                0);
         }
     }
 }

@@ -48,8 +48,8 @@ namespace GTI780_TP1.Header.Entities
             var imagePath = Path.Combine(filePath, HEADERFILENAME);
 
             // Do not create the file if it already is on disk.
-            if(!File.Exists(imagePath))
-            { 
+            //if(!File.Exists(imagePath))
+            //{ 
                 var imageBuffer = this.BuildImageBuffer();
             
                 this.HeaderImage = new Bitmap(
@@ -60,7 +60,7 @@ namespace GTI780_TP1.Header.Entities
                     Marshal.UnsafeAddrOfPinnedArrayElement(imageBuffer, 0));
 
                 this.HeaderImage.Save(imagePath);
-            }
+            //}
         }
 
         /// <summary>

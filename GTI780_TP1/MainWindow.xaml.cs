@@ -74,7 +74,7 @@ namespace GTI780_TP1
 
             // Instanciate the WriteableBitmaps used to display the kinect frames
             this.colorBitmap = new WriteableBitmap(RAWCOLORWIDTH, RAWCOLORHEIGHT, 96.0, 96.0, PixelFormats.Bgr32, null);
-            this.depthBitmap = new WriteableBitmap(RAWDEPTHWIDTH, RAWDEPTHHEIGHT, 96.0, 96.0, PixelFormats.Gray8, null); //Quel type de gris??
+            this.depthBitmap = new WriteableBitmap(RAWDEPTHWIDTH, RAWDEPTHHEIGHT, 96.0, 96.0, PixelFormats.Bgr32, null); 
 
             // Connect to the Kinect Sensor
             this.kinectSensor = KinectSensor.GetDefault();
