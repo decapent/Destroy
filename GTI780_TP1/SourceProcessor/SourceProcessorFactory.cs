@@ -15,6 +15,12 @@ namespace GTI780_TP1.SourceProcessor
         private const int RAWCOLORWIDTH = 1920;
         private const int RAWCOLORHEIGHT = 1080;
 
+        /// <summary>
+        /// Generates a new instance of a concrete AbstractSourceProcessor base on the specified type
+        /// </summary>
+        /// <param name="processorType">The type of source processor wanted</param>
+        /// <param name="mapper">Optional, Used by the depth source processor to match the color to depth pixels</param>
+        /// <returns></returns>
         public static AbstractSourceProcessor Create(SourceProcessorTypes processorType, CoordinateMapper mapper = null)
         {
             switch(processorType)
