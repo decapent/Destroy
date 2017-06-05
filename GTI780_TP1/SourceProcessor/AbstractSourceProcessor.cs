@@ -12,6 +12,8 @@ namespace GTI780_TP1.SourceProcessor
 
         public WriteableBitmap Bitmap { get; set; }
 
+        protected bool IsBitmapLocked { get; set; }
+
         public AbstractSourceProcessor(SourceProcessorTypes processorType)
         {
             this.ProcessorType = processorType;

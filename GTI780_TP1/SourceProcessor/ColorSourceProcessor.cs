@@ -20,7 +20,7 @@ namespace GTI780_TP1.SourceProcessor
 
         public void Process(ColorFrame frame)
         {
-            bool isBitmapLocked = true;
+            this.IsBitmapLocked = true;
 
             try
             { 
@@ -41,12 +41,12 @@ namespace GTI780_TP1.SourceProcessor
 
                     // Unlock the Bitmap
                     this.Bitmap.Unlock();
-                    isBitmapLocked = false;
+                    this.IsBitmapLocked = false;
                 }
             }
             finally
             {
-                if (isBitmapLocked)
+                if (this.IsBitmapLocked)
                 {
                     this.Bitmap.Unlock();
                 }

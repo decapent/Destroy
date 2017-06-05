@@ -10,11 +10,6 @@ namespace GTI780_TP1.SourceProcessor
     public sealed class DepthSourceProcessor : AbstractSourceProcessor
     {
         /// <summary>
-        /// Map depth range to byte range
-        /// </summary>
-        private const int MAPDEPTHTOBYTE = 8000 / 256;
-
-        /// <summary>
         /// Intermediate storage for frame data converted to color
         /// </summary>
         private byte[] _depthPixels = null;
@@ -30,7 +25,7 @@ namespace GTI780_TP1.SourceProcessor
 
         public void Process(DepthFrame frame, FrameDescription colorFrameDescription)
         {
-            bool isBitmapLocked = true;
+            this.IsBitmapLocked = true;
 
             try
             {
@@ -43,29 +38,14 @@ namespace GTI780_TP1.SourceProcessor
 
                     if (frameDescription.Width == this.Bitmap.Width && frameDescription.Height == this.Bitmap.Height)
                     {
-                        // Use coordinate mapper to
                         var depthSpacePointTable = new DepthSpacePoint[colorFrameDescription.Width * colorFrameDescription.Height];
                         this._mapper.MapColorFrameToDepthSpaceUsingIntPtr(depthBuffer.UnderlyingBuffer, depthBuffer.Size, depthSpacePointTable);
 
-                        //  Utiliser la ligne ci-dessous pour l'image de profondeur
-                        Image<Gray, byte> depthImageGray = new Image<Gray, byte>(
-                            (int)this.Bitmap.Width,  
-                            (int)this.Bitmap.Height,  
-                            (int)this.Bitmap.Width, // stride
-                            depthBuffer.UnderlyingBuffer); // data
-
-                        //-----------------------------------------------------------
-                        // Traiter l'image de profondeur 
-                        //-----------------------------------------------------------
-
-                        // Une fois traitée convertir l'image en Bgra
-                        Image<Bgra, byte> depthImageBgra = depthImageGray.Convert<Bgra, byte>();
-
                         this.ProcessDepthFrameData(
-                            depthImageBgra.Ptr,
-                            (uint)depthImageBgra.Data.Length,
-                            frame.DepthMinReliableDistance,
-                            frame.DepthMaxReliableDistance,
+                            depthBuffer.UnderlyingBuffer, 
+                            depthBuffer.Size, 
+                            frame.DepthMinReliableDistance, 
+                            frame.DepthMaxReliableDistance, 
                             frameDescription.BytesPerPixel);
 
                         // Render depth pixels
@@ -77,12 +57,12 @@ namespace GTI780_TP1.SourceProcessor
                     }
                     
                     this.Bitmap.Unlock();
-                    isBitmapLocked = false;
+                    this.IsBitmapLocked = false;
                 }
             }
             finally
             {
-                if (isBitmapLocked)
+                if (this.IsBitmapLocked)
                 {
                     this.Bitmap.Unlock();
                 }
@@ -99,16 +79,13 @@ namespace GTI780_TP1.SourceProcessor
         /// <param name="depthFrameDataSize">Size of the DepthFrame image data</param>
         /// <param name="minDepth">The minimum reliable depth value for the frame</param>
         /// <param name="maxDepth">The maximum reliable depth value for the frame</param>
-        /// <param name="bytesPerPixel">The number of bytes used per pixel</param>
-        private unsafe void ProcessDepthFrameData(
-            IntPtr depthFrameData, 
-            uint depthFrameDataSize, 
-            ushort minDepth, 
-            ushort maxDepth, 
-            uint bytesPerPixel)
+        /// /// <param name="bytesPerPixel">The number of bytes used per pixel</param>
+        private unsafe void ProcessDepthFrameData(IntPtr depthFrameData, uint depthFrameDataSize, ushort minDepth, ushort maxDepth, uint bytesPerPixel)
         {
             // depth frame data is a 16 bit value
             ushort* frameData = (ushort*)depthFrameData;
+
+            int MapDepthToByte = -1 * (maxDepth / 256);
 
             // convert depth to a visual representation
             for (int i = 0; i < (int)(depthFrameDataSize / bytesPerPixel); ++i)
@@ -118,8 +95,20 @@ namespace GTI780_TP1.SourceProcessor
 
                 // To convert to a byte, we're mapping the depth value to the byte range.
                 // Values outside the reliable depth range are mapped to 0 (black).
-                this._depthPixels[i] = (byte)(depth >= minDepth && depth <= maxDepth ? (depth / MAPDEPTHTOBYTE) : 0);
+                this._depthPixels[i] = (byte)(depth >= minDepth && depth <= maxDepth ? (depth / MapDepthToByte) : 0);
             }
+
+            //  Utiliser la ligne ci-dessous pour l'image de profondeur
+            Image<Gray, byte> depthImageGray = new Image<Gray, byte>((int)this.Bitmap.Width, (int)this.Bitmap.Height);
+
+            //-----------------------------------------------------------
+            // Traiter l'image de profondeur 
+            //-----------------------------------------------------------
+            depthImageGray.Bytes = this._depthPixels;
+
+            // Une fois traitée convertir l'image en Bgra
+            var depthImageBgra = depthImageGray.Convert<Bgra, byte>();           
+            depthImageBgra = depthImageBgra.SmoothMedian(7);          
         }
     }
 }

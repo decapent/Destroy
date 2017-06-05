@@ -121,80 +121,8 @@ namespace GTI780_TP1
             
             try
             {
-                // ===============================
-                // ColorFrame code block
-                // ===============================   
                 this.colorProcessor.Process(colorFrame);
-
-                // ================================================================
-                // DepthFrame code block : À modifier et completer 
-                // Remarque : Beaucoup de code à modifer/ajouter dans cette partie
-                // ================================================================
-                this.depthProcessor.Process(depthFrame, colorFrame.FrameDescription);
-
-                // allocate space to put the pixels being received and converted
-                //this.depthFrameDescription = this.kinectSensor.DepthFrameSource.FrameDescription;
-                //this.depthPixels = new byte[depthDescription.Width * depthDescription.Height];
-
-                //using (KinectBuffer depthBuffer = depthFrame.LockImageBuffer())
-                //{
-                //    // Lock the depthBitmap while we write in it.
-                //    this.depthBitmap.Lock();
-                //    isDepthBitmapLocked = true;
-
-                //    // Check for correct size
-                //    if (depthDescription.Width == this.colorBitmap.Width && depthDescription.Height == this.colorBitmap.Height)
-                //    {
-
-                //        //-----------------------------------------------------------
-                //        // Effectuer la correspondance espace Profondeur---Couleur 
-                //        //-----------------------------------------------------------
-
-                //        DepthSpacePoint[] depthSpacePointTable = null;
-                //        FrameDescription colorFrameDescription = this.kinectSensor.ColorFrameSource.FrameDescription;
-
-                //        int colorFrameWidht = colorFrameDescription.Width;
-                //        int colorFrameHeight = colorFrameDescription.Height;
-                //        depthSpacePointTable = new DepthSpacePoint[colorFrameWidht * colorFrameHeight];
-                //        this.kinectSensor.CoordinateMapper.MapColorFrameToDepthSpaceUsingIntPtr(depthBuffer.UnderlyingBuffer, depthBuffer.Size, depthSpacePointTable);
-
-                //        //................................//
-
-
-                //        //  Utiliser la ligne ci-dessous pour l'image de profondeur
-                //        Image<Gray, byte> depthImageGray = new Image<Gray, byte>(RAWDEPTHWIDTH, RAWDEPTHHEIGHT);
-
-                //        //-----------------------------------------------------------
-                //        // Traiter l'image de profondeur 
-                //        //-----------------------------------------------------------
-
-                      
-
-                //        // Une fois traitée convertir l'image en Bgra
-                //        Image<Bgra, byte> depthImageBgra = depthImageGray.Convert<Bgra, byte>();
-                //        depthImageBgra = depthImageBgra.SmoothMedian(15);
-                //    }
-
-                    ////---------------------------------------------------------------------------------------------------------
-                    ////  Modifier le code pour que depthBitmap contienne depthImageBgra au lieu du contenu trame couleur actuel
-                    ////---------------------------------------------------------------------------------------------------------
-                    //if (colorDescription.Width == this.colorBitmap.Width && colorDescription.Height == this.colorBitmap.Height)
-                    //{
-                    //    // Note: In order to see the full range of depth (including the less reliable far field depth)
-                    //    // we are setting maxDepth to the extreme potential depth threshold
-                    //    ushort maxDepth = ushort.MaxValue;
-
-                    //    // If you wish to filter by reliable depth distance, uncomment the following line:
-                    //    //// maxDepth = depthFrame.DepthMaxReliableDistance
-
-                    //    this.ProcessDepthFrameData(depthBuffer.UnderlyingBuffer, depthBuffer.Size, depthFrame.DepthMinReliableDistance, maxDepth);
-                    //    this.RenderDepthPixels();
-                    //}
-
-                    //// Unlock the depthBitmap
-                    //this.depthBitmap.Unlock();
-                    //isDepthBitmapLocked = false;
-                //}                
+                this.depthProcessor.Process(depthFrame, colorFrame.FrameDescription);    
             }
             finally
             {
@@ -277,42 +205,5 @@ namespace GTI780_TP1
                 this.kinectSensor = null;
             }
         }
-
-
-        /// <summary>
-        /// Directly accesses the underlying image buffer of the DepthFrame to 
-        /// create a displayable bitmap.
-        /// This function requires the /unsafe compiler option as we make use of direct
-        /// access to the native memory pointed to by the depthFrameData pointer.
-        /// </summary>
-        /// <param name="depthFrameData">Pointer to the DepthFrame image data</param>
-        /// <param name="depthFrameDataSize">Size of the DepthFrame image data</param>
-        /// <param name="minDepth">The minimum reliable depth value for the frame</param>
-        /// <param name="maxDepth">The maximum reliable depth value for the frame</param>
-        //private unsafe void ProcessDepthFrameData(IntPtr depthFrameData, uint depthFrameDataSize, ushort minDepth, ushort maxDepth)
-        //{
-        //    // depth frame data is a 16 bit value
-        //    ushort* frameData = (ushort*)depthFrameData;
-
-        //    // convert depth to a visual representation
-        //    for (int i = 0; i < (int)(depthFrameDataSize / this.depthProcessor.Source.FrameDescription.BytesPerPixel); ++i)
-        //    {
-        //        // Get the depth for this pixel
-        //        ushort depth = frameData[i];
-
-        //        // To convert to a byte, we're mapping the depth value to the byte range.
-        //        // Values outside the reliable depth range are mapped to 0 (black).
-        //        this.depthPixels[i] = (byte)(depth >= minDepth && depth <= maxDepth ? (depth / MapDepthToByte) : 0);
-        //    }
-        //}
-
-        //private void RenderDepthPixels()
-        //{
-        //    this.depthBitmap.WritePixels(
-        //        new Int32Rect(0, 0, this.depthBitmap.PixelWidth, this.depthBitmap.PixelHeight),
-        //        this.depthPixels,
-        //        this.depthBitmap.PixelWidth,
-        //        0);
-        //}
     }
 }
