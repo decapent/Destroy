@@ -1,17 +1,19 @@
-﻿using System;
-using System.Windows;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
+﻿using Emgu.CV;
+using Emgu.CV.Structure;
+using GTI780_TP1.Extensions;
+using GTI780_TP1.Header;
+using GTI780_TP1.Header.Entities;
+using Microsoft.Kinect;
+using System;
+using System.Collections.Generic;
 // Includes for the Lab
 using System.ComponentModel;
 using System.IO;
-using Microsoft.Kinect;
+using System.Linq;
+using System.Windows;
 using System.Windows.Forms;
-using Emgu.CV;
-using Emgu.CV.Structure;
-using GTI780_TP1.Header;
-using GTI780_TP1.Header.Entities;
-using GTI780_TP1.Extensions;
+using System.Windows.Media;
+using System.Windows.Media.Imaging;
 
 namespace GTI780_TP1
 {
@@ -40,6 +42,7 @@ namespace GTI780_TP1
         private WriteableBitmap colorBitmap = null;
         private WriteableBitmap depthBitmap = null;
 
+
         // The kinect sensor
         private KinectSensor kinectSensor = null;
 
@@ -57,6 +60,24 @@ namespace GTI780_TP1
         private Image<Bgra, byte> depthImageBgra = null;
 
 
+        //Uses for DIBR algorithm
+        //Mesearement from the Dimenco TV
+        private double T = 1651; //Should be in mm. Pour 65 pouces
+        private double W = 0.0;
+        private double H = 0.0;
+        private int TV_Ratio_Hihgt = 9;
+        private int TV_Ratio_Width = 16;
+
+        private const int NUMBER_PIXELS_WIDTH = 3840;
+
+        //User distance from Dimenco TV
+        private double D = 0.0;
+        private double tc = 65; // milimeters 
+        private double knear = 0.1;
+        private double kfar = 0.2;
+        private int N = 8; // number of bits
+        private double depthPossibleValue = 0;
+
 
         public MainWindow()
         {
@@ -64,6 +85,7 @@ namespace GTI780_TP1
 
             // Sets the correct size to the display components
             InitializeComponentsSize();
+            this.setTeleveisonDimension();
 
             // Set Header image for 2d color + depth side by side format
             InitializeHeader();
@@ -168,14 +190,13 @@ namespace GTI780_TP1
                     // Check for correct size
                     if (depthDescription.Width == this.colorBitmap.Width && depthDescription.Height == this.colorBitmap.Height)
                     {
-
                         //-----------------------------------------------------------
                         // Effectuer la correspondance espace Profondeur---Couleur 
                         //-----------------------------------------------------------
-
-
-                        this.kinectSensor.CoordinateMapper.MapColorFrameToDepthSpaceUsingIntPtr(depthBuffer.UnderlyingBuffer,
-                                         depthBuffer.Size, new DepthSpacePoint[colorFrameDescription.Width * colorFrameDescription.Height]);
+                        this.kinectSensor.CoordinateMapper.MapColorFrameToDepthSpaceUsingIntPtr(
+                            depthBuffer.UnderlyingBuffer,
+                            depthBuffer.Size,
+                            new DepthSpacePoint[colorFrameDescription.Width * colorFrameDescription.Height]);
 
                     }
 
@@ -192,7 +213,13 @@ namespace GTI780_TP1
 
                         //Ajust the depth data and plot it.
                         this.ProcessDepthFrameData(depthBuffer.UnderlyingBuffer, depthBuffer.Size, depthFrame.DepthMinReliableDistance, maxDepth);
-                        this.RenderDepthPixels();
+                        // this.RenderDepthPixels();
+
+                        //--------------------------------------------
+                        // Creation de la seconde image
+                        //--------------------------------------------
+
+                        BuildingNewImage(colorFrame);
 
                     }
 
@@ -200,7 +227,6 @@ namespace GTI780_TP1
                     this.depthBitmap.Unlock();
                     isDepthBitmapLocked = false;
                 }
-
 
                 // We are done with the depthFrame, dispose of it
                 depthFrame.Dispose();
@@ -248,6 +274,7 @@ namespace GTI780_TP1
                 return this.depthBitmap;
             }
         }
+
         /// <summary>
         /// Used for setting the image presentation window.
         /// </summary>
@@ -269,13 +296,13 @@ namespace GTI780_TP1
             this.Grid1.Height = this.screenHeight;
 
             // Make the PictureBox1 half the screen width and full screen height
-            this.PictureBox1.Width = this.screenWidth / 2;
-            this.PictureBox1.Height = this.screenHeight;
+            this.PictureBox1.Width = this.screenWidth;
+            this.PictureBox1.Height = this.screenHeight /2;
 
             // Make the PictureBox2 half the screen width and full screen height
-            this.PictureBox2.Width = this.screenWidth / 2;
+            this.PictureBox2.Width = this.screenWidth;
             this.PictureBox2.Margin = new Thickness(0, 0, 0, 0);
-            this.PictureBox2.Height = this.screenHeight;
+            this.PictureBox2.Height = this.screenHeight /2;
         }
 
         /// <summary>
@@ -284,7 +311,7 @@ namespace GTI780_TP1
         private void InitializeHeader()
         {
             var applicationPath = System.IO.Path.GetDirectoryName(System.IO.Path.GetDirectoryName(Directory.GetCurrentDirectory()));
-            var header = HeaderFactory.Create(HeaderType.Stereoscopic);
+            var header = HeaderFactory.Create(HeaderType.TopAndDown);
 
             header.EnsureBitmap(applicationPath);
 
@@ -342,9 +369,9 @@ namespace GTI780_TP1
                 this.depthPixels[i] = (byte)(depth >= minDepth && depth <= maxDepth ? (depth / MapDepthToByte) : 0);
             }
 
+
             //  Utiliser la ligne ci-dessous pour l'image de profondeur
             Image<Gray, byte> depthImageGray = new Image<Gray, byte>(RAWDEPTHWIDTH, RAWDEPTHHEIGHT);
-
             //-----------------------------------------------------------
             // Traiter l'image de profondeur 
             //-----------------------------------------------------------
@@ -368,5 +395,92 @@ namespace GTI780_TP1
                 this.depthBitmap.PixelWidth * 4,
                 0);
         }
+
+        /// <summary>
+        ///  Method to calculate the dimension of the Dimenco TV.
+        /// </summary>
+        private void setTeleveisonDimension()
+        {
+            H = Math.Sqrt(Math.Pow(T, 2) * Math.Pow(TV_Ratio_Hihgt, 2) / (Math.Pow(TV_Ratio_Width, 2) + Math.Pow(TV_Ratio_Hihgt, 2)));
+            W = Math.Sqrt(Math.Pow(T, 2) - Math.Pow(H, 2));
+            D = 3 * H;
+        }
+
+        private void BuildingNewImage(ColorFrame colorframe)
+        {
+            var zp = CalculateZp(colorframe);
+            var ppixels = CalculateDisparity(ref zp);
+           // var rightImageBytes = new byte[ppixels.Length];
+            var colorPixels = new byte[ppixels.Length];
+      
+            byte[] arrayColorwithOffset = new byte[RAWCOLORWIDTH * RAWCOLORHEIGHT *4];
+            byte[] arrayColor = new byte[RAWCOLORWIDTH * RAWCOLORHEIGHT * 4];
+
+            //colorframe.CopyConvertedFrameDataToArray(arrayColorwithOffset, ColorImageFormat.Bgra);
+            colorframe.CopyConvertedFrameDataToArray(arrayColor, ColorImageFormat.Bgra);
+            int memoire = 0;
+
+            for (int i = 0; i < RAWDEPTHWIDTH * RAWDEPTHHEIGHT * 4; i++)
+            {
+                var ppixel = ppixels[i];
+                var leftImageValue = arrayColor[i];
+                var newPixelPosition = i + ppixel;
+                
+                for (int j = 0; j < 8; j++)
+                {
+                    if (newPixelPosition + j < RAWDEPTHWIDTH * RAWDEPTHHEIGHT * 8)
+                    {
+                        arrayColorwithOffset[newPixelPosition + j]  = leftImageValue;
+                    }
+                }
+               //memoire = memoire + 7;
+
+
+            }
+            
+            this.depthBitmap.WritePixels(
+                    new Int32Rect(0, 0, this.depthBitmap.PixelWidth, this.depthBitmap.PixelHeight),
+                    arrayColorwithOffset,
+                    this.depthBitmap.PixelWidth * 4,
+                    0);
+        }
+
+        /// <summary>
+        /// Methode to calculate the Zp value of the pixel
+        /// </summary>
+        private double[] CalculateZp(ColorFrame colorFrame)
+        {
+            //byte[] arrayDepthColor = new byte[RAWCOLORWIDTH * RAWCOLORHEIGHT];
+            var arrayDepthColor = this.depthImageBgra.Bytes;
+
+            var zp = new double[RAWDEPTHWIDTH * RAWDEPTHHEIGHT * 4];//[this.depthPixels.Length*4];
+            this.depthPossibleValue = ((Math.Pow(2, N)) - 1);
+
+            //for (int i = 0; i < 1920*1080/4 -3; i++)
+            for(int i = 0; i < arrayDepthColor.Count(); i++)
+            {
+                zp[i] = W * ((arrayDepthColor[i] / depthPossibleValue) * (knear + kfar) - kfar);
+            }
+
+            return zp;
+        }
+
+        private int[] CalculateDisparity(ref double[] zp)
+        {
+            var ppixels = new int[zp.Length];
+            for (int i = 0; i < zp.Length; i++)
+            {
+                var p = tc * (1 - (D / (D - zp[i])));
+                ppixels[i] = (int)Math.Round(p * 1920 / W);
+
+                if (ppixels[i] < 0)
+                {
+                    ppixels[i] = ppixels[i] * -1;
+                } 
+            }
+
+            return ppixels;
+        }
+        
     }
 }
