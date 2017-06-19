@@ -13,12 +13,14 @@ namespace GTI780_TP1.Header
         /// </summary>
         /// <param name="headerType">The type of header to create.</param>
         /// <returns>A new instance of the Header class</returns>
-        public static AbstractHeader Create(HeaderType headerType)
+        public static StereoscopicHeader Create(HeaderType headerType)
         {
             switch(headerType)
             {
-                case HeaderType.Stereoscopic:
-                    return CreateStereoscopicHeader() as StereoscopicHeader;
+                case HeaderType.SideBySide:
+                    return CreateStereoscopicHeader() as SideBySideHeader;
+                case HeaderType.TopAndDown:
+                    return CreateTopAndDownHeader() as TopAndDownHeader;
                 default:
                     throw new ArgumentException("HeaderFactory.Create : Unrecognized HeaderType requested");
             }
@@ -28,11 +30,18 @@ namespace GTI780_TP1.Header
         /// Create a new StereoscopicHeader with an instantiated header message
         /// </summary>
         /// <returns>A new instance of the StereoscopicHeader class.</returns>
-        private static AbstractHeader CreateStereoscopicHeader()
+        private static StereoscopicHeader CreateStereoscopicHeader()
         {
             // The calculated Header Message for a 2d Scene + Depth side by side
             var H = "F10140800000C42DD3AFF2140000000000000000000000000000000036958221";
-            return new StereoscopicHeader(H);
+            return new SideBySideHeader(H);
+        }
+
+        private static StereoscopicHeader CreateTopAndDownHeader()
+        {
+            // The calculated Header Message for something something
+            var H = "F10140801000D47C48BCF22233000000000000000000000000000000AF7AB8ED";
+            return new TopAndDownHeader(H);
         }
     }
 }

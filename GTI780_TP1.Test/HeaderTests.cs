@@ -25,7 +25,7 @@ namespace GTI780_TP1.Test
         public void EnsureBitmap_SuppliedWithEmptyFilePath_ShouldThrowArgumentNullException()
         {
             // Arrange
-            var header = HeaderFactory.Create(HeaderType.Stereoscopic);
+            var header = HeaderFactory.Create(HeaderType.SideBySide);
 
             // Act
             header.EnsureBitmap(string.Empty);
@@ -39,7 +39,7 @@ namespace GTI780_TP1.Test
         public void EnsureBitmap_SuppliedWithInexistantDirectory_ShouldThrowExternalException()
         {
             // Arrange
-            var header = HeaderFactory.Create(HeaderType.Stereoscopic);
+            var header = HeaderFactory.Create(HeaderType.SideBySide);
             var invalidDirectoryPath = string.Format("C:\\{0}", new Guid().ToString());
 
             // Act
@@ -57,13 +57,13 @@ namespace GTI780_TP1.Test
         {
             // Arrange
             var applicationPath = Path.GetDirectoryName(Path.GetDirectoryName(Directory.GetCurrentDirectory()));
-            var header = HeaderFactory.Create(HeaderType.Stereoscopic);
+            var header = HeaderFactory.Create(HeaderType.SideBySide);
 
             // Act
             header.EnsureBitmap(applicationPath);
 
             // Assert
-            Assert.IsNull(header.HeaderImage);
+            Assert.IsNotNull(header.HeaderImage);
         }
     }
 }

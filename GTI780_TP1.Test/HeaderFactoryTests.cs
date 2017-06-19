@@ -33,16 +33,35 @@ namespace GTI780_TP1.Test
         /// </summary>
         [TestMethod]
         [TestCategory("Factory")]
-        public void Create_SuppliedWithStereoscopicHeaderType_ShouldCreateNewHeaderWithMessage()
+        public void Create_SuppliedWithSideySideHeaderType_ShouldCreateNewHeaderWithMessage()
         {
             // Arrange
 
             // Act
-            var header = HeaderFactory.Create(HeaderType.Stereoscopic);
+            var header = HeaderFactory.Create(HeaderType.SideBySide);
 
             // Assert
             Assert.IsNotNull(header);
-            Assert.IsInstanceOfType(header, typeof(StereoscopicHeader));
+            Assert.IsInstanceOfType(header, typeof(SideBySideHeader));
+            Assert.IsFalse(string.IsNullOrEmpty(header.HeaderMessage));
+            Assert.AreEqual(64, header.HeaderMessage.Length);
+        }
+
+        /// <summary>
+        /// Tests that a StereoScopic Header type instantiate a new Header with it's defaulted header message
+        /// </summary>
+        [TestMethod]
+        [TestCategory("Factory")]
+        public void Create_SuppliedWithTopAndDownHeaderType_ShouldCreateNewHeaderWithMessage()
+        {
+            // Arrange
+
+            // Act
+            var header = HeaderFactory.Create(HeaderType.TopAndDown);
+
+            // Assert
+            Assert.IsNotNull(header);
+            Assert.IsInstanceOfType(header, typeof(TopAndDownHeader));
             Assert.IsFalse(string.IsNullOrEmpty(header.HeaderMessage));
             Assert.AreEqual(64, header.HeaderMessage.Length);
         }

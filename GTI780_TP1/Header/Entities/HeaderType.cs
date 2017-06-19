@@ -6,8 +6,13 @@
     public enum HeaderType
     {
         /// <summary>
-        /// For a stereoscopic TV image header
+        /// For a stereoscopic TV image header with the color on the left and the depth on the right
         /// </summary>
-        Stereoscopic
+        SideBySide,
+
+        /// <summary>
+        /// Something something DIBR
+        /// </summary>
+        TopAndDown
     }
 }

@@ -1,73 +1,97 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Drawing;
 using System.Drawing.Imaging;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
-
 using GTI780_TP1.Extensions;
 
 namespace GTI780_TP1.Header.Entities
 {
     /// <summary>
-    /// Concrete implementation of the Header class for a stereoscopic header type
+    /// Abstraction of the header to be inserted in the top left corner of the Kinect stream 
     /// </summary>
-    public sealed class StereoscopicHeader : AbstractHeader
+    public abstract class StereoscopicHeader
     {
+        /// <summary>
+        /// Represent the header file name to be saved on disk
+        /// </summary>
+        protected const string HEADERFILENAME = "EnteteModifiee.bmp";
+
         /// <summary>
         /// The header image buffer size
         /// </summary>
-        private const short BUFFERSIZE = 512;
-        
+        protected const short BUFFERSIZE = 512;
+
         /// <summary>
-        /// Instantiate a new StereoscopicHeader object
+        /// The Image Header type property
         /// </summary>
-        /// <param name="H">The header hexadecimal message</param>
-        public StereoscopicHeader(string H)
-            :base(HeaderType.Stereoscopic, H)
+        public HeaderType HeaderType { get; private set; }
+
+        /// <summary>
+        /// The 32 bytes message indicating the format of the image being displayed
+        /// </summary>
+        public string HeaderMessage { get; private set; }
+
+        /// <summary>
+        /// The actual bitmap file to be inserted in the top left corner of the image
+        /// </summary>
+        public Bitmap HeaderImage { get; set; }
+
+        /// <summary>
+        /// The header message converted to binary, each array entry is equivalent to a byte
+        /// </summary>
+        protected IEnumerable<string> _binaryMessage = null;
+
+        /// <summary>
+        /// Instantiate a new Header object
+        /// </summary>
+        /// <param name="headerType">The type of the header</param>
+        /// <param name="H">The header's message to be converted to bitmap</param>
+        public StereoscopicHeader(HeaderType headerType, string H)
         {
-            
+            this.HeaderType = headerType;
+            this.HeaderMessage = H;
+
+            this._binaryMessage = this.HeaderMessage.HexToBinaryBytes();
         }
 
         /// <summary>
         /// Writes the header on the disk as a Bitmap file
         /// </summary>
         /// <param name="filePath">The path to the directory in which will be saved the header image</param>
-        public override void EnsureBitmap(string filePath)
+        public virtual void EnsureBitmap(string filePath)
         {
-            if(string.IsNullOrEmpty(filePath))
+            if (string.IsNullOrEmpty(filePath))
             {
                 throw new ArgumentNullException("filePath");
             }
-            
-            if(!Directory.Exists(filePath))
+
+            if (!Directory.Exists(filePath))
             {
                 throw new ExternalException("The specified directory does not exists!");
             }
 
             var imagePath = Path.Combine(filePath, HEADERFILENAME);
 
-            // Do not create the file if it already is on disk.
-            //if(!File.Exists(imagePath))
-            //{ 
-                var imageBuffer = this.BuildImageBuffer();
-            
-                this.HeaderImage = new Bitmap(
-                    imageBuffer.Length, // columns
-                    1,                  // rows
-                    imageBuffer.Length, // stride
-                    PixelFormat.Format8bppIndexed,
-                    Marshal.UnsafeAddrOfPinnedArrayElement(imageBuffer, 0));
+            var imageBuffer = this.BuildImageBuffer();
 
-                this.HeaderImage.Save(imagePath);
-            //}
+            this.HeaderImage = new Bitmap(
+                imageBuffer.Length, // columns
+                1,                  // rows
+                imageBuffer.Length, // stride
+                PixelFormat.Format8bppIndexed,
+                Marshal.UnsafeAddrOfPinnedArrayElement(imageBuffer, 0));
+
+            this.HeaderImage.Save(imagePath);
         }
 
         /// <summary>
         /// Construct the byte array containing the header data
         /// </summary>
         /// <returns>The byte representation of the header</returns>
-        protected override byte[] BuildImageBuffer()
+        protected virtual byte[] BuildImageBuffer()
         {
             var imageBuffer = new byte[BUFFERSIZE];
 
@@ -92,12 +116,13 @@ namespace GTI780_TP1.Header.Entities
         }
 
         /// <summary>
-        /// Calculates the index of the header image buffer that needs to be written.
+        /// The H function that calculates at which index to write the pixel
+        /// of the resulting Header Image
         /// </summary>
-        /// <param name="x">The byte index</param>
-        /// <param name="y">The bit index</param>
-        /// <returns>The index of the header image buffer.</returns>
-        private static int H(int x, int y)
+        /// <param name="x">The current byte index</param>
+        /// <param name="y">The current bit index</param>
+        /// <returns></returns>
+        protected virtual int H(int x, int y)
         {
             return 2 * (7 - y) + 16 * x;
         }

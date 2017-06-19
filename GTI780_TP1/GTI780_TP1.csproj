@@ -85,6 +85,7 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="Header\Entities\TopAndDownHeader.cs" />
     <Compile Include="SourceProcessor\AbstractSourceProcessor.cs" />
     <Compile Include="SourceProcessor\ColorSourceProcessor.cs" />
     <Compile Include="SourceProcessor\DepthSourceProcessor.cs" />
@@ -99,9 +100,9 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="Extensions\BitmapExtensions.cs" />
-    <Compile Include="Header\Entities\AbstractHeader.cs" />
-    <Compile Include="Header\Entities\HeaderType.cs" />
     <Compile Include="Header\Entities\StereoscopicHeader.cs" />
+    <Compile Include="Header\Entities\HeaderType.cs" />
+    <Compile Include="Header\Entities\SideBySideHeader.cs" />
     <Compile Include="Extensions\StringExtensions.cs" />
     <Compile Include="Header\HeaderFactory.cs" />
     <Compile Include="MainWindow.xaml.cs">
