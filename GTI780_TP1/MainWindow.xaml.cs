@@ -92,7 +92,7 @@ namespace GTI780_TP1
 
             // Instanciate the WriteableBitmaps used to display the kinect frames
             this.colorBitmap = new WriteableBitmap(RAWCOLORWIDTH, RAWCOLORHEIGHT, 96.0, 96.0, PixelFormats.Bgr32, null);
-            this.depthBitmap = new WriteableBitmap(RAWDEPTHWIDTH, RAWDEPTHHEIGHT, 96.0, 96.0, PixelFormats.Bgr32, null);
+            this.depthBitmap = new WriteableBitmap(RAWCOLORWIDTH, RAWCOLORHEIGHT, 96.0, 96.0, PixelFormats.Bgr32, null);
 
             // Connect to the Kinect Sensor
             this.kinectSensor = KinectSensor.GetDefault();
@@ -422,19 +422,21 @@ namespace GTI780_TP1
             colorframe.CopyConvertedFrameDataToArray(arrayColor, ColorImageFormat.Bgra);
             int memoire = 0;
 
-            for (int i = 0; i < RAWDEPTHWIDTH * RAWDEPTHHEIGHT * 4; i++)
+            for (int i = 0; i < RAWCOLORWIDTH * RAWCOLORHEIGHT ; i++)
             {
                 var ppixel = ppixels[i];
                 var leftImageValue = arrayColor[i];
                 var newPixelPosition = i + ppixel;
-                
-                for (int j = 0; j < 8; j++)
+
+                arrayColorwithOffset[newPixelPosition] = leftImageValue;
+
+               /* for (int j = 0; j < 8; j++)
                 {
                     if (newPixelPosition + j < RAWDEPTHWIDTH * RAWDEPTHHEIGHT * 4)
                     {
                         arrayColorwithOffset[newPixelPosition + j]  = leftImageValue;
                     }
-                }
+                }*/
                //memoire = memoire + 7;
 
 
