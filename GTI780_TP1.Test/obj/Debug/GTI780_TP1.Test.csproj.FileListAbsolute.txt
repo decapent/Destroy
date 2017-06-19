@@ -8,3 +8,13 @@ C:\Users\patrick.lavallee\Documents\ETS\GTI780\TP1\GTI780_TP1.Test\bin\Debug\Mic
 C:\Users\patrick.lavallee\Documents\ETS\GTI780\TP1\GTI780_TP1.Test\obj\Debug\GTI780_TP1.Test.csprojResolveAssemblyReference.cache
 C:\Users\patrick.lavallee\Documents\ETS\GTI780\TP1\GTI780_TP1.Test\obj\Debug\GTI780_TP1.Test.dll
 C:\Users\patrick.lavallee\Documents\ETS\GTI780\TP1\GTI780_TP1.Test\obj\Debug\GTI780_TP1.Test.pdb
+D:\Ecole\5.Ete2017\GTI780\TP\TP\Destroy\GTI780_TP1.Test\bin\Debug\GTI780_TP1.Test.dll
+D:\Ecole\5.Ete2017\GTI780\TP\TP\Destroy\GTI780_TP1.Test\bin\Debug\GTI780_TP1.Test.pdb
+D:\Ecole\5.Ete2017\GTI780\TP\TP\Destroy\GTI780_TP1.Test\bin\Debug\GTI780_TP1.exe
+D:\Ecole\5.Ete2017\GTI780\TP\TP\Destroy\GTI780_TP1.Test\bin\Debug\Microsoft.Kinect.dll
+D:\Ecole\5.Ete2017\GTI780\TP\TP\Destroy\GTI780_TP1.Test\bin\Debug\Emgu.CV.World.dll
+D:\Ecole\5.Ete2017\GTI780\TP\TP\Destroy\GTI780_TP1.Test\bin\Debug\GTI780_TP1.pdb
+D:\Ecole\5.Ete2017\GTI780\TP\TP\Destroy\GTI780_TP1.Test\bin\Debug\Microsoft.Kinect.xml
+D:\Ecole\5.Ete2017\GTI780\TP\TP\Destroy\GTI780_TP1.Test\obj\Debug\GTI780_TP1.Test.csprojResolveAssemblyReference.cache
+D:\Ecole\5.Ete2017\GTI780\TP\TP\Destroy\GTI780_TP1.Test\obj\Debug\GTI780_TP1.Test.dll
+D:\Ecole\5.Ete2017\GTI780\TP\TP\Destroy\GTI780_TP1.Test\obj\Debug\GTI780_TP1.Test.pdb

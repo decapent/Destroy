@@ -179,7 +179,9 @@ namespace GTI780_TP1
                 // allocate space to put the pixels being received and converted
                 this.depthFrameDescription = this.kinectSensor.DepthFrameSource.FrameDescription;
 
-                this.depthPixels = new byte[this.depthFrameDescription.Width * this.depthFrameDescription.Height];
+                // this.depthPixels = new byte[this.depthFrameDescription.Width * this.depthFrameDescription.Height];
+
+                this.depthPixels = new byte[colorFrameDescription.Width * colorFrameDescription.Height];
 
                 using (KinectBuffer depthBuffer = depthFrame.LockImageBuffer())
                 {
@@ -371,7 +373,7 @@ namespace GTI780_TP1
 
 
             //  Utiliser la ligne ci-dessous pour l'image de profondeur
-            Image<Gray, byte> depthImageGray = new Image<Gray, byte>(RAWDEPTHWIDTH, RAWDEPTHHEIGHT);
+            Image<Gray, byte> depthImageGray = new Image<Gray, byte>(RAWCOLORWIDTH, RAWCOLORHEIGHT);
             //-----------------------------------------------------------
             // Traiter l'image de profondeur 
             //-----------------------------------------------------------
@@ -428,7 +430,7 @@ namespace GTI780_TP1
                 
                 for (int j = 0; j < 8; j++)
                 {
-                    if (newPixelPosition + j < RAWDEPTHWIDTH * RAWDEPTHHEIGHT * 8)
+                    if (newPixelPosition + j < RAWDEPTHWIDTH * RAWDEPTHHEIGHT * 4)
                     {
                         arrayColorwithOffset[newPixelPosition + j]  = leftImageValue;
                     }
@@ -453,11 +455,11 @@ namespace GTI780_TP1
             //byte[] arrayDepthColor = new byte[RAWCOLORWIDTH * RAWCOLORHEIGHT];
             var arrayDepthColor = this.depthImageBgra.Bytes;
 
-            var zp = new double[RAWDEPTHWIDTH * RAWDEPTHHEIGHT * 4];//[this.depthPixels.Length*4];
+            var zp = new double[RAWCOLORWIDTH * RAWCOLORHEIGHT];//[this.depthPixels.Length*4];
             this.depthPossibleValue = ((Math.Pow(2, N)) - 1);
 
             //for (int i = 0; i < 1920*1080/4 -3; i++)
-            for(int i = 0; i < arrayDepthColor.Count(); i++)
+            for(int i = 0; i < zp.Length; i++)
             {
                 zp[i] = W * ((arrayDepthColor[i] / depthPossibleValue) * (knear + kfar) - kfar);
             }
