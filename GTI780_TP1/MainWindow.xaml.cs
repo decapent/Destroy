@@ -416,28 +416,24 @@ namespace GTI780_TP1
             var colorPixels = new byte[ppixels.Length];
       
             byte[] arrayColorwithOffset = new byte[RAWCOLORWIDTH * RAWCOLORHEIGHT *4];
-            byte[] arrayColor = new byte[RAWCOLORWIDTH * RAWCOLORHEIGHT * 4];
+
+            byte[] arrayColor = new byte[RAWCOLORWIDTH * RAWCOLORHEIGHT *4]; // X4 a cause de BGRA
 
             //colorframe.CopyConvertedFrameDataToArray(arrayColorwithOffset, ColorImageFormat.Bgra);
             colorframe.CopyConvertedFrameDataToArray(arrayColor, ColorImageFormat.Bgra);
             int memoire = 0;
 
-            for (int i = 0; i < RAWCOLORWIDTH * RAWCOLORHEIGHT ; i++)
+            for (int i = 0; i < RAWCOLORWIDTH * RAWCOLORHEIGHT *4 ; i++)
             {
                 var ppixel = ppixels[i];
                 var leftImageValue = arrayColor[i];
                 var newPixelPosition = i + ppixel;
 
-                arrayColorwithOffset[newPixelPosition] = leftImageValue;
-
-               /* for (int j = 0; j < 8; j++)
+                if (newPixelPosition < arrayColorwithOffset.Length)
                 {
-                    if (newPixelPosition + j < RAWDEPTHWIDTH * RAWDEPTHHEIGHT * 4)
-                    {
-                        arrayColorwithOffset[newPixelPosition + j]  = leftImageValue;
-                    }
-                }*/
-               //memoire = memoire + 7;
+                    arrayColorwithOffset[newPixelPosition] = leftImageValue;
+                }
+    
 
 
             }
@@ -457,7 +453,7 @@ namespace GTI780_TP1
             //byte[] arrayDepthColor = new byte[RAWCOLORWIDTH * RAWCOLORHEIGHT];
             var arrayDepthColor = this.depthImageBgra.Bytes;
 
-            var zp = new double[RAWCOLORWIDTH * RAWCOLORHEIGHT];//[this.depthPixels.Length*4];
+            var zp = new double[RAWCOLORWIDTH * RAWCOLORHEIGHT *4];//[this.depthPixels.Length*4];
             this.depthPossibleValue = ((Math.Pow(2, N)) - 1);
 
             //for (int i = 0; i < 1920*1080/4 -3; i++)
@@ -475,12 +471,13 @@ namespace GTI780_TP1
             for (int i = 0; i < zp.Length; i++)
             {
                 var p = tc * (1 - (D / (D - zp[i])));
+
                 ppixels[i] = (int)Math.Round(p * 1920 / W);
 
                 if (ppixels[i] < 0)
                 {
                     ppixels[i] = ppixels[i] * -1;
-                } 
+                }
             }
 
             return ppixels;
