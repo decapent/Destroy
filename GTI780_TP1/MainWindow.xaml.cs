@@ -75,9 +75,6 @@ namespace GTI780_TP1
         private double tc = 65; // milimeters 
         private double knear = 0.1;
         private double kfar = 0.2;
-        private int N = 8; // number of bits
-        private double depthPossibleValue = 0;
-
 
         public MainWindow()
         {
@@ -414,28 +411,27 @@ namespace GTI780_TP1
             var arrayColorWithOffset = new byte[RAWCOLORWIDTH * RAWCOLORHEIGHT * 4];
             colorFrame.CopyConvertedFrameDataToArray(arrayColor, ColorImageFormat.Bgra);
 
-            int currentIndex = 0;
-            foreach (var depthValue in this.depthImageBgra.Bytes)
+            var depthValues = this.depthImageBgra.Bytes;
+            for (int currentIndex = 0; currentIndex < depthValues.Length; currentIndex += 4)
             {
                 // Calculating Zp
-                var zp = W * ((depthValue / byte.MaxValue) * (knear + kfar) - kfar);
+                var zp = W * ((depthValues[currentIndex] / byte.MaxValue) * (knear + kfar) - kfar);
 
                 // Calculating Disparity
                 var p = tc * (1 - (D / (D - zp)));
-                var disparity = Math.Round(p * 1920 / W);
-                if(disparity < 0)
-                {
-                    disparity *= -1;
-                }
+                var disparity = Convert.ToInt32(Math.Round(p * 1920 / W));
 
-                var leftImageValue = arrayColor[currentIndex];
-                var newPixelPosition = (int)(currentIndex + disparity);
-                if(newPixelPosition < arrayColorWithOffset.Length)
-                {
-                    arrayColorWithOffset[newPixelPosition] = leftImageValue;
-                }
+                // Applying disparity to new image pixel
+                for (int colorByteIndex = 0; colorByteIndex < 4; colorByteIndex ++)
+                { 
+                    var leftImageValue = arrayColor[currentIndex + colorByteIndex];
+                    var newPixelPosition = (currentIndex + colorByteIndex) + disparity;
 
-                currentIndex++;
+                    if (newPixelPosition >= 0 && newPixelPosition < arrayColorWithOffset.Length)
+                    {
+                        arrayColorWithOffset[newPixelPosition] = leftImageValue;
+                    }
+                }
             }          
             
             this.depthBitmap.WritePixels(
