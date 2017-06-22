@@ -75,9 +75,6 @@ namespace GTI780_TP1
         private double tc = 65; // milimeters 
         private double knear = 0.1;
         private double kfar = 0.2;
-        private int N = 8; // number of bits
-        private double depthPossibleValue = 0;
-
 
         public MainWindow()
         {
@@ -85,7 +82,7 @@ namespace GTI780_TP1
 
             // Sets the correct size to the display components
             InitializeComponentsSize();
-            this.setTeleveisonDimension();
+            this.setTelevisionDimension();
 
             // Set Header image for 2d color + depth side by side format
             InitializeHeader();
@@ -401,87 +398,47 @@ namespace GTI780_TP1
         /// <summary>
         ///  Method to calculate the dimension of the Dimenco TV.
         /// </summary>
-        private void setTeleveisonDimension()
+        private void setTelevisionDimension()
         {
             H = Math.Sqrt(Math.Pow(T, 2) * Math.Pow(TV_Ratio_Hihgt, 2) / (Math.Pow(TV_Ratio_Width, 2) + Math.Pow(TV_Ratio_Hihgt, 2)));
             W = Math.Sqrt(Math.Pow(T, 2) - Math.Pow(H, 2));
             D = 3 * H;
         }
 
-        private void BuildingNewImage(ColorFrame colorframe)
+        private void BuildingNewImage(ColorFrame colorFrame)
         {
-            var zp = CalculateZp(colorframe);
-            var ppixels = CalculateDisparity(ref zp);
-           // var rightImageBytes = new byte[ppixels.Length];
-            var colorPixels = new byte[ppixels.Length];
-      
-            byte[] arrayColorwithOffset = new byte[RAWCOLORWIDTH * RAWCOLORHEIGHT *4];
+            var arrayColor = new byte[RAWCOLORWIDTH * RAWCOLORHEIGHT * 4]; // X4 a cause de BGRA
+            var arrayColorWithOffset = new byte[RAWCOLORWIDTH * RAWCOLORHEIGHT * 4];
+            colorFrame.CopyConvertedFrameDataToArray(arrayColor, ColorImageFormat.Bgra);
 
-            byte[] arrayColor = new byte[RAWCOLORWIDTH * RAWCOLORHEIGHT *4]; // X4 a cause de BGRA
-
-            //colorframe.CopyConvertedFrameDataToArray(arrayColorwithOffset, ColorImageFormat.Bgra);
-            colorframe.CopyConvertedFrameDataToArray(arrayColor, ColorImageFormat.Bgra);
-            int memoire = 0;
-
-            for (int i = 0; i < RAWCOLORWIDTH * RAWCOLORHEIGHT *4 ; i++)
+            var depthValues = this.depthImageBgra.Bytes;
+            for (int currentIndex = 0; currentIndex < depthValues.Length; currentIndex += 4)
             {
-                var ppixel = ppixels[i];
-                var leftImageValue = arrayColor[i];
-                var newPixelPosition = i + ppixel;
+                // Calculating Zp
+                var zp = W * ((depthValues[currentIndex] / byte.MaxValue) * (knear + kfar) - kfar);
 
-                if (newPixelPosition < arrayColorwithOffset.Length)
-                {
-                    arrayColorwithOffset[newPixelPosition] = leftImageValue;
+                // Calculating Disparity
+                var p = tc * (1 - (D / (D - zp)));
+                var disparity = Convert.ToInt32(Math.Round(p * 1920 / W));
+
+                // Applying disparity to new image pixel
+                for (int colorByteIndex = 0; colorByteIndex < 4; colorByteIndex ++)
+                { 
+                    var leftImageValue = arrayColor[currentIndex + colorByteIndex];
+                    var newPixelPosition = (currentIndex + colorByteIndex) + disparity;
+
+                    if (newPixelPosition >= 0 && newPixelPosition < arrayColorWithOffset.Length)
+                    {
+                        arrayColorWithOffset[newPixelPosition] = leftImageValue;
+                    }
                 }
-    
-
-
-            }
+            }          
             
             this.depthBitmap.WritePixels(
                     new Int32Rect(0, 0, this.depthBitmap.PixelWidth, this.depthBitmap.PixelHeight),
-                    arrayColorwithOffset,
+                    arrayColorWithOffset,
                     this.depthBitmap.PixelWidth * 4,
                     0);
-        }
-
-        /// <summary>
-        /// Methode to calculate the Zp value of the pixel
-        /// </summary>
-        private double[] CalculateZp(ColorFrame colorFrame)
-        {
-            //byte[] arrayDepthColor = new byte[RAWCOLORWIDTH * RAWCOLORHEIGHT];
-            var arrayDepthColor = this.depthImageBgra.Bytes;
-
-            var zp = new double[RAWCOLORWIDTH * RAWCOLORHEIGHT *4];//[this.depthPixels.Length*4];
-            this.depthPossibleValue = ((Math.Pow(2, N)) - 1);
-
-            //for (int i = 0; i < 1920*1080/4 -3; i++)
-            for(int i = 0; i < zp.Length; i++)
-            {
-                zp[i] = W * ((arrayDepthColor[i] / depthPossibleValue) * (knear + kfar) - kfar);
-            }
-
-            return zp;
-        }
-
-        private int[] CalculateDisparity(ref double[] zp)
-        {
-            var ppixels = new int[zp.Length];
-            for (int i = 0; i < zp.Length; i++)
-            {
-                var p = tc * (1 - (D / (D - zp[i])));
-
-                ppixels[i] = (int)Math.Round(p * 1920 / W);
-
-                if (ppixels[i] < 0)
-                {
-                    ppixels[i] = ppixels[i] * -1;
-                }
-            }
-
-            return ppixels;
-        }
-        
+        }        
     }
 }
