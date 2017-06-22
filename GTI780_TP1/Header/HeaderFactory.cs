@@ -39,7 +39,8 @@ namespace GTI780_TP1.Header
 
         private static StereoscopicHeader CreateTopAndDownHeader()
         {
-            // The calculated Header Message for something something
+            // The calculated Header Message for Top frame with color and
+            // bottom frame processed throught the DIBR algorithm.
             var H = "F10140801000D47C48BCF22233000000000000000000000000000000AF7AB8ED";
             return new TopAndDownHeader(H);
         }
