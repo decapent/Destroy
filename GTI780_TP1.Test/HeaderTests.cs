@@ -53,7 +53,7 @@ namespace GTI780_TP1.Test
         /// </summary>
         [TestMethod]
         [TestCategory("Header")]
-        public void EnsureBitmap_SuppliedWithExistingFilePath_ShouldNotCreateNewImageOnDisk()
+        public void EnsureBitmap_SuppliedWithExistingFilePath_ShouldCreateNewImageOnDisk()
         {
             // Arrange
             var applicationPath = Path.GetDirectoryName(Path.GetDirectoryName(Directory.GetCurrentDirectory()));
